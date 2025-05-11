@@ -1,0 +1,36 @@
+services:
+
+  postgres: # <--- Novo nome do serviço (chave)
+    image: postgres:15
+    container_name: prodsy_postgres # <--- Novo nome do contêiner
+    restart: always
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_USER: prodsyadmin # Mantenha suas credenciais
+      POSTGRES_PASSWORD: admin
+      POSTGRES_DB: prodsy_db
+    volumes:
+      - prodsy_postgres_data:/var/lib/postgresql/data # Podemos nomear o volume também
+    networks:
+      - prodsy_app_network # Podemos nomear a rede também
+
+  # Serviço do Redis (para cache)
+  redis: # <--- Novo nome do serviço (chave)
+    image: redis:7
+    container_name: prodsy_redis # <--- Novo nome do contêiner
+    restart: always
+    ports:
+      - "6379:6379"
+    volumes:
+      - prodsy_redis_data:/data # Podemos nomear o volume também
+    networks:
+      - prodsy_app_network
+
+volumes:
+  prodsy_postgres_data: # Nome do volume para dados do Postgres
+  prodsy_redis_data:    # Nome do volume para dados do Redis
+
+networks:
+  prodsy_app_network: # Nome da rede customizada
+    driver: bridge
