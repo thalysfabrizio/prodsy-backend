@@ -13,9 +13,9 @@ export class CreateUserDto {
   email: string;
 
   @IsString()
-  @IsOptional() // Torna o campo nome opcional
+  @IsOptional()
   @MinLength(2, { message: 'O nome deve ter pelo menos 2 caracteres.' })
-  name?: string; // O '?' também o torna opcional no TypeScript
+  name: string;
 
   @IsString({ message: 'A senha deve ser uma string.' })
   @IsNotEmpty({ message: 'O campo senha não pode estar vazio.' })

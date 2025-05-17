@@ -1,30 +1,74 @@
-// prisma/schema.prisma
-generator client {
-  provider = "prisma-client-js"
-}
-
 datasource db {
-  provider = "postgresql"
+  provider = "postgresql" 
   url      = env("DATABASE_URL")
 }
 
-model User {
-  id        Int      @id @default(autoincrement())
-  email     String   @unique
-  name      String?
-  password  String   // Lembre-se de hashear senhas na prática!
-  posts     Post[]
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+generator client {
+  provider = "prisma-client-js" 
 }
 
-model Post {
-  id        Int      @id @default(autoincrement())
-  title     String
-  content   String?
-  published Boolean  @default(false)
-  author    User     @relation(fields: [authorId], references: [id])
-  authorId  Int
+
+model User {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  name      String  
+  password  String   
+  role      UserRole @default(TEAM_LEAD)
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+
+  @@map("users")
+}
+
+enum UserRole {
+  ADMIN
+  TEAM_LEAD
+}
+
+model Collaborator {
+  id        String   @id @default(cuid())
+  name      String   
+  function  String? 
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  productionEntries ProductionEntry[]
+
+  @@map("collaborators")
+}
+
+model Product {
+  id        String   @id @default(cuid())
+  name      String   @unique
+  unitType  String   
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  commissionEnabled               Boolean @default(false)
+  productionThresholdForCommission  Float?  
+  commissionValuePerUnitOverThreshold Float? 
+
+  productionEntries ProductionEntry[]
+
+  @@map("products")
+}
+
+model ProductionEntry {
+  id             String   @id @default(cuid())
+  date           DateTime 
+  quantity       Float    
+  notes          String? 
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  collaboratorId String
+  collaborator   Collaborator @relation(fields: [collaboratorId], references: [id]) 
+
+  productId      String
+  product        Product      @relation(fields: [productId], references: [id])
+
+  @@unique([date, collaboratorId, productId])
+  @@map("production_entries")
 }
